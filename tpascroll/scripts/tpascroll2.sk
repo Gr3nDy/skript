@@ -1,0 +1,187 @@
+command /tpascroll [<text>] [<text>] [<text>]:
+	trigger:
+		if arg-1 is not set:
+			if player has permission "tpascroll.help":
+				message "&e&bTeleportation Scroll &8» &7/tpascroll help &ffor more information." to player
+			else: 
+				send "&4You don't have permission to do that!" to player
+
+		else if arg-1 is equal to "help":
+			if player has permission "tpascroll.help":
+				message "&7<<<<<&8[&bTPAScroll&8]&7>>>>>" to player
+				message "&7/tpascroll help" to player
+				message "&c└ &6List of commands" to player
+				message " " to player
+				message "&7/tpascroll drop <player> <amount>" to player
+				message "&c└ &6Drop user a Teleportation Scroll" to player
+				message " " to player
+				message "&7/tpascroll request" to player
+				message "&c└ &6Request Teleportation" to player
+				message " " to player
+				message "&7/tpascroll accept <player>" to player
+				message "&c└ &6Accept Teleportation Request from player" to player
+				message " " to player
+				message "&7/tpascroll deny <player>" to player
+				message "&c└ &6Deny Teleportation Request from player" to player
+				message " " to player
+				message "&7/tpascroll cancel" to player
+				message "&c└ &6Cancel Teleportation Request" to player
+				message "&7<<<<<&8[&bTPAScroll&8]&7>>>>>" to player
+			else: 
+				send "&4You don't have permission to do that!" to player
+
+		else if arg-1 is equal to "drop":
+			if player has permission "tpascroll.drop":
+				set {_p} to arg 2 parsed as player
+				if arg-2 is not set:
+					message "&e&bTeleportation Scroll &8» &4Insert Player Name" to player
+				else:
+					if {_p} is not online:
+						message "&e&bTeleportation Scroll &8» &4Player not found." to player
+					else:
+						if arg-3 is not set:
+							message "&e&bTeleportation Scroll &8» &4Specify the amount of the item" to player
+						else:
+							set {_drop} to arg-3 parsed as number
+							message "&e&bTeleportation Scroll &8» &aSuccesfully dropped &7%arg-3% %{tpascroll.item_name}%" to player
+							message "&e&bTeleportation Scroll &8» &aYou received &7%arg-3% %{tpascroll.item_name}%" to {_findplayer}
+							drop {_drop} of {tpascroll.item} named "%{tpascroll.item_name}%" with lore "%{tpascroll.item_lore}%" and " " and "%{tpascroll.item_sign}%" in front of {_p}'s head
+							play 4 firework spark in front of {_p}'s head
+			else: 
+				send "&4You don't have permission to do that!" to player
+
+		else if arg-1 is equal to "request":
+			if player has permission "tpascroll.use":
+				if player's held item is {tpascroll.item}:
+					if lore of player's held item contains "%{tpascroll.item_sign}%":
+						if {TPAScrollonrequest::%player%} is not set:
+							if {TPAScrolltarget::%player%} is not set:
+								set {_t} to {tpascroll.cooldown_time}
+								set {_TPAScroll.cooldown} to difference between {TPAScrollcooldown.%player%} and now
+								if {_TPAScroll.cooldown} is less than {_t}:
+									set {_cooldown.timer} to difference between {_t} and {_TPAScroll.cooldown}
+									set {_cooldown.counter} to "%{_cooldown.timer}%"
+									set {_l::*} to split {_cooldown.counter} at " "
+									loop {_l::*}:
+										delete {_i}
+										set {_i} to loop-value parsed as a number
+										{_i} is set
+										set {_i} to round({_i})
+										replace every "%loop-value%" in {_cooldown.counter} with "%{_i}%"
+									message "&bTeleportation Scroll &8» &4You need to wait &7%{_cooldown.counter}% &4to be able to do that."		
+								else:	
+									set {TPAScrollcooldown.%player%} to now
+									message " " to player
+									message formatted "&bTeleportation Scroll &8» &c&l<tooltip:Cancel Teleportation Request><run command:/tpascroll cancel>[X]<reset> &7Please insert &aPlayer Name&7 on the chat&8: " to player
+									message " " to player
+									set {TPAScroll::%player%} to true
+									set {TPAScrollonrequest::%player%} to true
+									set {_tpascrollonreqexpired::%player%} to {tpascroll.requestexpired_time} 
+									while {_tpascrollonreqexpired::%player%} is not 0:
+										subtract 1 from {_tpascrollonreqexpired::%player%}
+										if {TPAScrollonrequest::%player%} is not true:
+											stop
+										wait 1 seconds
+									delete {TPAScroll::%player%} 
+									delete {TPAScrolltarget::%player%}
+									delete {TPAScrollonrequest::%player%} 
+									send "&bTeleportation Scroll &8» &cTeleportation request has been expired." to player
+							else:
+								message formatted  "&bTeleportation Scroll &8» <tooltip:Cancel Teleportation Request><run command:/tpascroll cancel>&c&l[Cancel Request]<reset> &4You already sent Teleportation Request." to player
+						else:
+							message formatted  "&bTeleportation Scroll &8» <tooltip:Cancel Teleportation Request><run command:/tpascroll cancel>&c&l[Cancel Request]<reset> &4Please insert &aPlayer Name &4on the chat." to player
+					else:
+						message "&e&bTeleportation Scroll &8» &4Cancelled, You need to hold %{tpascroll.item_name}%&4." to player
+						set {TPAScroll.%player%} to false				
+				else:
+					message "&e&bTeleportation Scroll &8» &4Cancelled, You need to hold %{tpascroll.item_name}%&4." to player
+					set {TPAScroll.%player%} to false	
+			else: 
+				send "&4You don't have permission to do that!" to player
+
+		else if arg-1 is equal to "accept":
+			if player has permission "tpascroll.accept":
+				if arg-2 is not set:
+					message "&e&bTeleportation Scroll &8» &4Insert Player Name" to player
+				else:
+					set {_findplayer} to arg 2 parsed as player
+					if {TPAScroll::%arg-2%} is true:
+						if {_findplayer} is online:
+							set {_p} to player
+							set {_f} to arg 2 parsed as player
+							set {_target} to {TPAScrolltarget::%arg-2%}
+							if {_p} is {_target}:
+								delete {TPAScrolltarget::%arg-2%}
+								delete {TPAScroll::%arg-2%}
+								set {_tpascrolltpplayerloc::%player%} to location of player
+								message "&bTeleportation Scroll &8» &aYou accepted &f%{_f}%&7's &aTeleportation request" to player
+								message "&bTeleportation Scroll &8» &aYour Teleportation request to &f%{_target}% &ahas been accepted" to {_f}
+								message "&eTeleporting you to &f%{_f}% &ein &7%{tpascroll.wait}% &7seconds &ePlease do not move!" to {_f}
+								wait 2 seconds
+								set {_tpascrolltptimer::%player%} to {tpascroll.wait}
+								set {_tpascrolltptargetloc::%player%} to location of {_f}
+								while {_tpascrolltptimer::%player%} is not 0:
+									subtract 1 from {_tpascrolltptimer::%player%}
+									play 25 of portal particle at {_f} offset by vector(1,1,1) with extra 1
+									if distance between {_tpascrolltptargetloc::%player%} and {_f}'s location is bigger than 0.01:
+										drop 1 of {tpascroll.item} named "%{tpascroll.item_name}%" with lore "%{tpascroll.item_lore}%" and " " and "%{tpascroll.item_sign}%" in front of {_f}'s head
+										send "&cTeleportation has been cancelled due to movement." to {_f}
+										play 4 firework spark in front of {_f}'s head
+										stop
+									wait 1 seconds
+								teleport {_f} to {_tpascrolltpplayerloc::%player%}
+								play 50 of smoke particle at {_f} offset by vector(1,1,1) with extra 1
+								play sound "entity.enderman.teleport" with volume 1 to {_f}
+								message "&aSuccesfully Teleported to &f%{_target}%" to {_f}
+							else:
+								message "&bTeleportation Scroll &8» &4You do not have a pending request." to {_p}
+					else:
+						message "&bTeleportation Scroll &8» &4You do not have a pending request." to player
+			else: 
+				send "&4You don't have permission to do that!" to player
+
+
+		else if arg-1 is equal to "deny":
+			if player has permission "tpascroll.accept":
+				if arg-2 is not set:
+					message "&e&bTeleportation Scroll &8» &4Insert Player Name" to player
+				else:	
+					set {_findplayer} to arg 2 parsed as player
+					if {TPAScroll::%arg-2%} is true:
+						if {_findplayer} is online:
+							set {_p} to player
+							set {_f} to arg 2 parsed as player
+							set {_target} to {TPAScrolltarget::%arg-2%}
+							if {_p} is {_target}:
+								delete {TPAScrolltarget::%arg-2%}
+								delete {TPAScroll::%arg-2%}
+								message "&bTeleportation Scroll &8» &cYou declined &f%{_f}%&7's &cTeleportation request"
+								message "&bTeleportation Scroll &8» &cYour Teleportation request to &f%{_target}% &chas been denied" to {_f}
+								drop 1 of {tpascroll.item} named "%{tpascroll.item_name}%" with lore "%{tpascroll.item_lore}%" and " " and "%{tpascroll.item_sign}%" in front of {_f}'s head
+								play 4 firework spark in front of {_f}'s head
+							else:
+								message "&bTeleportation Scroll &8» &4You do not have a pending request." to {_p}
+					else:
+						message "&bTeleportation Scroll &8» &4You do not have a pending request." to player
+			else: 
+				send "&4You don't have permission to do that!" to player
+
+		else if arg-1 is equal to "cancel":
+			if player has permission "tpascroll.accept":
+				if {TPAScrolltarget::%player%} exist:
+					message "&bTeleportation Scroll &8» &cTeleportation request has been cancelled." to player
+					delete {TPAScroll::%player%} 
+					delete {TPAScrolltarget::%player%}
+					delete {TPAScrollonrequest::%player%}
+					drop 1 of {tpascroll.item} named "%{tpascroll.item_name}%" with lore "%{tpascroll.item_lore}%" and " " and "%{tpascroll.item_sign}%" in front of the player's head
+					play 4 firework spark in front of the player's head
+				else:
+					if {TPAScroll::%player%} is true:
+						message "&bTeleportation Scroll &8» &cTeleportation request has been cancelled." to player
+						delete {TPAScroll::%player%} 
+						delete {TPAScrolltarget::%player%}
+						delete {TPAScrollonrequest::%player%}
+					else:
+						message "&bTeleportation Scroll &8» &4You do not have a pending request." to player
+			else: 
+				send "&4You don't have permission to do that!" to player

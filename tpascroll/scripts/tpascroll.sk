@@ -1,0 +1,51 @@
+# TPAScroll
+# Made by Gr3nDy
+
+
+options:
+
+	#Set (true/false) whether players allowed to craft the item or not (If you set it to false you have to reload the skript and then restart the server)
+	item_crafting: true
+
+	#ITEM RECIPE
+	top_left: air
+	top: eye of ender
+	top_right: air
+	middle_left: eye of ender
+	middle: paper
+	middle_right: eye of ender
+	bottom_left: air
+	bottom: eye of ender
+	bottom_right: air
+
+on load:
+
+	#Item 
+	set {tpascroll.item} to paper 
+
+	#Item's Name
+	set {tpascroll.item_name} to "&eTeleportation Scroll" 
+
+	#Item's Description
+	set {tpascroll.item_lore} to "&7&oRight Click to Request Teleportation"
+
+	#Don't Change
+	set {tpascroll.item_sign} to "&8Teleportation Scroll"
+
+	#The expired time after Teleportation has been requested (in second)
+	set {tpascroll.expired_time} to 120
+
+	#The expired time for searching player (in second)
+	set {tpascroll.requestexpired_time} to 15
+
+	#The cooldown time before someone can request a teleportation (set to 0 seconds if you dont want a cooldown)
+	set {tpascroll.cooldown_time} to 10 seconds 
+
+	#The waiting time before teleporting to player (in seconds)
+	set {tpascroll.wait} to 7
+	
+	#Just ignore this
+	if {@item_crafting} is true:
+		register new shaped recipe for {tpascroll.item} named {tpascroll.item_name} with lore {tpascroll.item_lore} and " " and {tpascroll.item_sign} using {@top_left}, {@top}, {@top_right}, {@middle_left}, {@middle}, {@middle_right}, {@bottom_left}, {@bottom}, {@bottom_right} 
+	else:
+		stop

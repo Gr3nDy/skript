@@ -1,0 +1,104 @@
+on rightclick holding paper:
+	if player has permission "tpascroll.use":
+		if player's held item is {tpascroll.item}:
+			if name of player's held item is "%{tpascroll.item_name}%":
+				if lore of player's held item contains "%{tpascroll.item_sign}%":
+					set {TPAScrollcooldown::%player%} to now
+					set {_item} to a written book
+					set {_a::1} to text component of "    &LTeleportation%nl%"
+					set {_a::2} to text component of " %nl%         &LScroll%nl%"
+					set {_a::3} to text component of "%nl%&7Teleport to an individual between     the same or different dimensions. Scroll will be shattered to dust once it's being used."
+					set {_a::4} to text component of "%nl%%nl%   &1&n&lSearch Player"
+					set hover event of {_a::4} to hover event showing "&eClick here to find a player do you wish to Teleport to"
+					set click event of {_a::4} to click event to run command "/tpascroll request"
+					set page 1 of {_item} to {_a::*}
+					set {_b::1} to text component of "&l&nHow to use"
+					set {_b::2} to text component of "%nl%%nl%&7• Click on &1Search Player&7%nl%• Insert Player Name on the chat %nl%• Send Request by clicking the &aConfirm &7button / Cancel Request by clicking the &cCancel &7button"
+					set page 2 of {_item} to {_b::*}
+					set book author of {_item} to "Gr3nDy"
+					set book title of {_item} to "Teleportation Scroll"	
+					open book {_item} to player
+	else: 
+		send "&4You don't have permission to do that!" to player
+
+on chat:
+	if {TPAScrollonrequest::%player%} is true:
+		delete {TPAScrollonrequest::%player%}
+		cancel event 
+		if player's held item is {tpascroll.item}:
+			if lore of player's held item contains "%{tpascroll.item_sign}%":
+				set {_TPAScrollfindplayer::%player%} to the chat message parsed as player
+				if {_TPAScrollfindplayer::%player%} has permission "tpascroll.accept":
+					if {_TPAScrollfindplayer::%player%} is player:
+						message "&bTeleportation Scroll &8» &4You cannot send Teleportation Request to yourself." to player
+					else:
+						set {TPAScrolltarget::%player%} to the chat message parsed as player
+						if {TPAScrolltarget::%player%} is not online:
+							message "&bTeleportation Scroll &8» &4Player not found." to player
+							delete {TPAScrolltarget::%player%}
+						else:
+							remove {tpascroll.item} from the player's tool
+							set {_p} to player
+							open chest with 3 rows named "&eTeleportation Scroll" to player
+							set {TPAScrollongui::%player%} to true
+							set {_slot} to 0
+							loop 27 times:
+								format gui slot {_slot} of player with air
+								add 1 to {_slot}
+						format gui slot 4 of player with head of {TPAScrolltarget::%player%} named "&eDo you wish to proceed with the request of Teleportation to &f%{TPAScrolltarget::%player%}%&e?" 
+						format gui slot 15 of player with red stained glass pane named "&c&lCancel" with lore "&7Cancel Teleportation Request" to run:
+							delete {TPAScrollongui::%player%}
+							make player execute command "/tpascroll cancel"
+							close player's inventory
+						format gui slot 11 of player with lime stained glass pane named "&a&lConfirm" with lore "&7Send Teleportation Request" to run:
+							message formatted  "&c&l<tooltip:Cancel Teleportation Request><run command:/tpascroll cancel>[X]<reset> &aSending Teleportation request to &f%{TPAScrolltarget::%player%}%" to player
+							message "&f%{_p}% &ehas requested to teleport to you" to {TPAScrolltarget::%player%}
+							message formatted "         <tooltip:Accept Teleportation Request><run command:/tpascroll accept %{_p}%>&a&l[ACCEPT]<reset>    <tooltip:Decline Teleportation Request><run command:/tpascroll deny %{_p}%>&c&l[DECLINE]<reset>          " to {TPAScrolltarget::%player%}
+							message "&eThis request will be expired after &c120 seconds" to {TPAScrolltarget::%player%}
+							delete {TPAScrollonrequest::%player%}
+							delete {TPAScrollongui::%player%}			
+							close player's inventory			
+							set {_tpascrolltpexpired::%player%} to {tpascroll.expired_time} 
+							while {_tpascrolltpexpired::%player%} is not 0:
+								subtract 1 from {_tpascrolltpexpired::%player%}
+								if {TPAScroll::%player%} is not true:
+									stop	
+								wait 1 seconds
+							message "&bTeleportation Scroll &8» &cTeleportation request has been expired." to player
+							drop 1 of {tpascroll.item} named "%{tpascroll.item_name}%" with lore "%{tpascroll.item_lore}%" and " " and "%{tpascroll.item_sign}%" in front of the player's head
+							play 4 firework spark in front of the player's head
+							delete {TPAScroll::%player%} 
+							delete {TPAScrolltarget::%player%}
+							delete {tpascrolltpexpired::%player%}
+				else:
+					send "&4That player doesn't have permission to confirm Teleportation Request!" to player
+
+			else:
+				message "&e&bTeleportation Scroll &8» &4You need to hold %{tpascroll.item_name}%" to player
+				set {TPAScroll::%player%} to false				
+		else:
+			message "&e&bTeleportation Scroll &8» &4You need to hold %{tpascroll.item_name}%" to player
+			set {TPAScroll::%player%} to false	
+
+on inventory close:
+	if name of player's current inventory is "&eTeleportation Scroll":
+		if {TPAScrollongui::%player%} is true:
+			message "&bTeleportation Scroll &8» &cTeleportation request has been cancelled." to player
+			delete {TPAScroll::%player%} 
+			delete {TPAScrolltarget::%player%}
+			delete {TPAScrollonrequest::%player%}
+			delete {TPAScrollongui::%player%}
+			drop 1 of {tpascroll.item} named "%{tpascroll.item_name}%" with lore "%{tpascroll.item_lore}%" and " " and "%{tpascroll.item_sign}%" in front of the player's head
+			play 4 firework spark in front of the player's head
+
+on anvil rename:
+	name of event-item is "%{tpascroll.item_name}%"
+	lore of event-item contains "%{tpascroll.item_sign}%"
+	cancel event
+
+on disconnect:
+	delete {TPAScroll::%player%} 
+	delete {TPAScrollonrequest::%player%} 
+	delete {TPAScrollongui::%player%}
+	delete {TPAScrolltarget::%player%}
+	delete {TPAScrollcooldown.%player%}
