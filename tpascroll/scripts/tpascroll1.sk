@@ -3,6 +3,8 @@
 
 
 options:
+	#Version (do not change)
+	version: 1.0.0
 
 	#Set (true/false) whether players allowed to craft the item or not (If you set it to false you have to reload the skript and then restart the server)
 	item_crafting: true
