@@ -58,4 +58,4 @@ on join:
 	set {_version} to line 1 from url "https://raw.githubusercontent.com/Gr3nDy/skript/main/tpascroll/version.txt"
 	if {_version} is not {@version}:
 		if player is op:
-			message formatted "&bTeleportation Scroll &8» &7Your Skript is outdated check out the new update here:"<https://github.com/Gr3nDy/skript/blob/main/tpascroll/README.MD> &f<Click Here>"
+			message formatted "&bTeleportation Scroll &8» &7Your Skript is outdated check out the new update here:"<https://github.com/Gr3nDy/skript/blob/main/tpascroll/README.MD> &f<Click Here>" to player
