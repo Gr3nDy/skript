@@ -1,0 +1,6 @@
+1. Install Skript and all the required add-ons
+
+2. Put all the skript inside your scripts folder
+   (/plugins/Skript/scripts/)
+
+3. Reload all the skript in the game using /sk reload <skriptname>
