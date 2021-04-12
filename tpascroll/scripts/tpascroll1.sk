@@ -3,9 +3,6 @@
 
 
 options:
-	#Version (do not change)
-	version: 1.0.0
-
 	#Set (true/false) whether players allowed to craft the item or not (If you set it to false you have to reload the skript and then restart the server)
 	item_crafting: true
 
@@ -51,11 +48,3 @@ on load:
 		register new shaped recipe for {tpascroll.item} named {tpascroll.item_name} with lore {tpascroll.item_lore} and " " and {tpascroll.item_sign} using {@top_left}, {@top}, {@top_right}, {@middle_left}, {@middle}, {@middle_right}, {@bottom_left}, {@bottom}, {@bottom_right} 
 	else:
 		stop
-
-
-	#Ignore this as well
-on join:
-	set {_version} to line 1 from url "https://raw.githubusercontent.com/Gr3nDy/skript/main/tpascroll/version.txt"
-	if {_version} is not {@version}:
-		if player is op:
-			message formatted "&bTeleportation Scroll &8» &7Your Skript is outdated check out the new update here:"<https://github.com/Gr3nDy/skript/blob/main/tpascroll/README.MD> &f<Click Here>" to player
